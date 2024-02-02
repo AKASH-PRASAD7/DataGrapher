@@ -1,16 +1,15 @@
-import React from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { useTable, useSortBy } from "react-table";
+import React, { useMemo, useEffect } from "react";
+import { useTable, usePagination, useRowSelect } from "react-table";
+import { useSelector, useDispatch } from "react-redux";
+import { selectProduct } from "../Feautures/products/productSlice";
+import TableFilter from "./FilterTable";
 
-const columns = [
+const columns1 = [
   {
     Header: "ID",
     accessor: "id",
   },
-  {
-    Header: "SELECTED",
-    accessor: "Selected",
-  },
+
   {
     Header: "TITLE",
     accessor: "Title",
@@ -29,73 +28,152 @@ const columns = [
   },
 ];
 
-const Table = () => {
+const PaginationTable = () => {
+  const { products, filterProducts } = useSelector((state) => state.products);
   const dispatch = useDispatch();
-  const { products } = useSelector((state) => state.products);
-  console.log(products);
 
-  const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } =
-    useTable(
-      {
-        columns,
-        data: products,
-      },
-      useSortBy
-    );
+  // console.log(filterProducts);
+
+  const columns = useMemo(() => columns1, []);
+  const data = useMemo(
+    () => (filterProducts.length > 0 ? filterProducts : products),
+    [products, filterProducts]
+  );
+
+  const {
+    getTableProps,
+    getTableBodyProps,
+    headerGroups,
+    page,
+    nextPage,
+    previousPage,
+    canPreviousPage,
+    canNextPage,
+    pageOptions,
+    state,
+
+    gotoPage,
+    pageCount,
+    selectedFlatRows,
+
+    prepareRow,
+  } = useTable(
+    {
+      columns,
+      data,
+    },
+
+    usePagination,
+    useRowSelect,
+    (hooks) => {
+      hooks.visibleColumns.push((columns) => [
+        {
+          id: "selection",
+          Header: ({ getToggleAllRowsSelectedProps }) => (
+            <input
+              type="checkbox"
+              indeterminate={
+                selectedFlatRows.length > 0 &&
+                selectedFlatRows.length < products.length
+              }
+              {...getToggleAllRowsSelectedProps()}
+            />
+          ),
+          Cell: ({ row }) => (
+            <input
+              type="checkbox"
+              indeterminate={
+                selectedFlatRows.length > 0 &&
+                selectedFlatRows.length < products.length
+              }
+              {...row.getToggleRowSelectedProps()}
+            />
+          ),
+        },
+        ...columns,
+      ]);
+    }
+  );
+
+  useEffect(() => {
+    dispatch(selectProduct(selectedFlatRows.map((row) => row.original)));
+  }, [selectedFlatRows]);
+
+  const { pageIndex } = state;
+  // console.log(selectedFlatRows);
 
   return (
-    <>
-      <section className="flex justify-center">
-        <table
-          {...getTableProps()}
-          className="max-w-11/12 bg-gray-800 text-white border border-gray-700"
-        >
-          <thead>
-            {headerGroups.map((header, index) => (
+    <div className="flex justify-center items-center flex-col mx-auto p-4  ">
+      <TableFilter className="mx-auto" />
+      <table {...getTableProps()} className="w-full  ">
+        <thead className="bg-black text-white ">
+          {headerGroups.map((headerGroup) => (
+            <tr {...headerGroup.getHeaderGroupProps()}>
+              {headerGroup.headers.map((column) => (
+                <th {...column.getHeaderProps()} className="py-2 px-4 ">
+                  {column.render("Header")}
+                </th>
+              ))}
+            </tr>
+          ))}
+        </thead>
+        <tbody className="bg-blue-900" {...getTableBodyProps()}>
+          {page.map((row) => {
+            prepareRow(row);
+            return (
               <tr
-                key={index}
-                {...header.getHeaderGroupProps()}
-                className="bg-gray-700"
+                {...row.getRowProps()}
+                className="border-b hover:bg-lime-500 hover:text-black text-base"
               >
-                {header.headers.map((column, i) => (
-                  <th
-                    key={i}
-                    {...column.getHeaderProps(column.getSortByToggleProps())}
-                    className="p-2 text-left"
+                {row.cells.map((cell) => (
+                  <td
+                    {...cell.getCellProps()}
+                    className="py-2 text-center px-4"
                   >
-                    {column.render("Header")}
-                    {column.isSorted ? " 🔽" : " ⬆️"}
-                  </th>
+                    {cell.render("Cell")}
+                  </td>
                 ))}
               </tr>
-            ))}
-          </thead>
-          <tbody {...getTableBodyProps()}>
-            {rows.map((row, index) => {
-              prepareRow(row);
-              return (
-                <tr
-                  key={index}
-                  {...row.getRowProps()}
-                  className={index % 2 === 0 ? "bg-gray-900" : "bg-gray-800"}
-                >
-                  {row.cells.map((cell, i) => (
-                    <td
-                      key={i}
-                      {...cell.getCellProps()}
-                      className="p-2 border-t border-gray-700"
-                    >
-                      {cell.render("Cell")}
-                    </td>
-                  ))}
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </section>
-    </>
+            );
+          })}
+        </tbody>
+      </table>
+      <div className="mt-8 flex items-center gap-12 justify-between">
+        <div>
+          <button
+            onClick={() => previousPage()}
+            disabled={!canPreviousPage}
+            className={`${
+              !canPreviousPage
+                ? "text-white bg-gray-500  p-2 rounded-xl font-semibold"
+                : " text-white bg-blue-500 hover:bg-blue-600 p-2 rounded-xl font-semibold"
+            } `}
+          >
+            Previous
+          </button>{" "}
+          <button
+            onClick={() => nextPage()}
+            disabled={!canNextPage}
+            className={`${
+              !canNextPage
+                ? "text-white bg-gray-500  px-4 py-2 rounded-xl font-semibold"
+                : "text-white bg-lime-500 hover:bg-lime-600 px-4 py-2 rounded-xl font-semibold"
+            }`}
+          >
+            Next
+          </button>{" "}
+        </div>
+        <div className="flex items-center">
+          <span className="mr-2">
+            Page{" "}
+            <strong>
+              {pageIndex + 1} of {pageOptions.length}
+            </strong>{" "}
+          </span>
+        </div>
+      </div>
+    </div>
   );
 };
 
-export default Table;
+export default PaginationTable;
