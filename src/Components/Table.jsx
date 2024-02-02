@@ -105,7 +105,7 @@ const PaginationTable = () => {
   return (
     <div className="flex justify-center items-center flex-col mx-auto p-4  ">
       <TableFilter className="mx-auto" />
-      <table {...getTableProps()} className="w-full  ">
+      <table {...getTableProps()} className="w-3/5  ">
         <thead className="bg-black text-white ">
           {headerGroups.map((headerGroup) => (
             <tr {...headerGroup.getHeaderGroupProps()}>
