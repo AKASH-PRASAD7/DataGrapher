@@ -4,6 +4,9 @@
 
 Data Grapher is a web application built with ReactJS, Plotly.js, React-Table, Redux Toolkit, and Vite. It allows users to visualize data through a Data Table and Bar Chart. Users can select rows from the table to filter the data displayed in the bar chart. The app supports pagination and retrieves data from an API using dummy JSON.
 
+## Screenshot
+<img width="845" alt="image" src="https://github.com/AKASH-PRASAD7/DataGrapher/assets/110546856/d506bf52-eb41-4391-bfd8-00df397aac3e">
+
 ## Features
 
 1. **Data Table:**
