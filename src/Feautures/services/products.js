@@ -2,10 +2,12 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export const productsApi = createApi({
   reducerPath: "productsApi",
-  baseQuery: fetchBaseQuery({ baseUrl: "https://dummyjson.com/" }),
+  baseQuery: fetchBaseQuery({
+    baseUrl: "https://dummyjson.com/products",
+  }),
   endpoints: (builder) => ({
     getProducts: builder.query({
-      query: (limit) => `products?limit=100`,
+      query: (page) => `?limit=10&skip=${page}`,
     }),
   }),
 });

@@ -1,15 +1,26 @@
-import React, { useEffect } from "react";
+import React, { useEffect, lazy, Suspense, useState } from "react";
 import "./App.css";
 import { useGetProductsQuery } from "./Feautures/services/products";
-import { useDispatch } from "react-redux";
-import { getProducts, selectProduct } from "./Feautures/products/productSlice";
-import Table from "./Components/Table";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  getProducts,
+  setTotal,
+  selectProduct,
+} from "./Feautures/products/productSlice";
+
 import Chart from "./Components/Chart";
 import Loader from "./Components/Loader";
 
+import Pagination from "./Components/Pagination";
+
+const SearchTable = lazy(() => import("./Components/SearchTable"));
+
+const Table1 = lazy(() => import("./Components/Table1"));
+
 const App = () => {
   const dispatch = useDispatch();
-  const { data, error, isLoading } = useGetProductsQuery();
+  const { page } = useSelector((state) => state.products);
+  const { data, error, isLoading } = useGetProductsQuery(page || 0);
 
   const newProducts = data?.products.map((product) => ({
     id: product.id,
@@ -19,31 +30,35 @@ const App = () => {
     Stock: product.stock,
   }));
 
-  // const selectedProducts = newProducts?.filter((item) => item.id < 6);
-
   useEffect(() => {
     if (newProducts) {
       dispatch(getProducts(newProducts));
+      dispatch(setTotal(data.total));
     }
-  }, [newProducts]);
+  }, [page, data]);
 
   return (
     <>
       <h1 className="text-5xl text-center m-8  text-lime-500 italic text-shadow-xl  font-semibold ">
         Data Grapher
       </h1>
-      <div>
-        {error ? (
-          <p className="text-2xl text-red-600">Oh no, there was an error</p>
-        ) : isLoading ? (
-          <Loader />
-        ) : data ? (
-          <>
-            <Chart />
-            <Table />
-          </>
-        ) : null}
-      </div>
+      <Chart />
+
+      <Suspense fallback={<Loader />}>
+        <main>
+          {error ? (
+            <p className="text-2xl text-center font-semibold text-red-500">
+              Oh no, there was an error fetching data.
+            </p>
+          ) : (
+            <>
+              <SearchTable />
+              {isLoading ? <Loader /> : <Table1 />}
+              <Pagination />
+            </>
+          )}
+        </main>
+      </Suspense>
     </>
   );
 };

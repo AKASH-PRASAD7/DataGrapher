@@ -2,7 +2,7 @@ import React, { useMemo, useEffect } from "react";
 import { useTable, usePagination, useRowSelect } from "react-table";
 import { useSelector, useDispatch } from "react-redux";
 import { selectProduct } from "../Feautures/products/productSlice";
-import TableFilter from "./FilterTable";
+import TableFilter from "./SearchTable";
 
 const columns1 = [
   {
@@ -103,7 +103,7 @@ const PaginationTable = () => {
   // console.log(selectedFlatRows);
 
   return (
-    <div className="flex justify-center items-center flex-col mx-auto p-4  ">
+    <div className="flex justify-center items-center flex-col mx-auto p-4 h-vh ">
       <TableFilter className="mx-auto" />
       <table {...getTableProps()} className="w-3/5  ">
         <thead className="bg-black text-white ">

@@ -1,24 +1,48 @@
-.loader-container {
+.skeleton-table {
+  width: 60%;
+  margin: auto;
+}
+
+.skeleton-row {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
 }
 
-.loader {
-  border: 8px solid #f3f3f3;
-  border-top: 8px solid #3498db;
-  border-radius: 50%;
-  width: 50px;
-  height: 50px;
-  animation: spin 1s linear infinite;
+.skeleton-row.header .skeleton-cell {
+  height: 30px;
 }
 
-@keyframes spin {
+.skeleton-row .skeleton-cell {
+  height: 20px;
+  flex: 1;
+  margin: 5px;
+  background: #484444;
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.skeleton-cell::before {
+  content: "";
+  display: block;
+  position: absolute;
+  left: -150px;
+  top: 0;
+  height: 100%;
+  width: 100px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(121, 107, 107, 0.6),
+    transparent
+  );
+  animation: load 1.5s infinite;
+}
+
+@keyframes load {
   0% {
-    transform: rotate(0deg);
+    left: -150px;
   }
   100% {
-    transform: rotate(360deg);
+    left: 100%;
   }
 }
